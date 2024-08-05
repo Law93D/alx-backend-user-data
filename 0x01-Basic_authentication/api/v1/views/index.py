@@ -6,11 +6,38 @@ from api.v1.views import app_views
 from flask import abort
 
 
-@app.route('/api/v1/unauthorized', methods=['GET'])
-def unauthorized_route():
-    abort(401)
+@app_views.route('/status', methods=['GET'], strict_slashes=False)
+def status() -> str:
+    """ GET /api/v1/status
+    Return:
+      - the status of the API
+    """
+    return jsonify({"status": "OK"})
 
 
-@app.route('/api/v1/forbidden', methods=['GET'])
-def forbidden_route():
-    abort(403)
+@app_views.route('/stats/', strict_slashes=False)
+def stats() -> str:
+    """ GET /api/v1/stats
+    Return:
+      - the number of each objects
+    """
+    from models.user import User
+    stats = {}
+    stats['users'] = User.count()
+    return jsonify(stats)
+
+
+@app_views.route('/unauthorized/', method=['GET'], strict_slashes=False)
+def unauthorized() -> str:
+    """ abort.
+
+    """
+    return abort(401)
+
+
+@app_views.route('/forbidden/', method=['GET'], strict_slashes=False)
+def forbidden() -> str:
+    """ abort.
+
+    """
+    return abort(403)

@@ -6,32 +6,49 @@ from typing import List, TypeVar
 
 
 class Auth:
+    """
+    manage API auth
+    """
+
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
+        """
+        Checks if auth is required to access path
+        """
+        if path and not path.endswith('/'):
+            path = path + '/'
+        if not path or path not in excluded_path:
+            return True
+        if not excluded_paths or excluded_paths == []:
+            return True
+        if path in excluded_paths:
+            return False
         return False
 
-    def authorization_header(self, request=None) -> str:
+    def authorization_header(self, request=None) -> None:
+        """
+
+        """
         return None
 
-    def current_user(self, request=None) -> TypeVar('User'):
+    def current_user(self, request=None) -> None:
+        """
+
+        """
         return None
 
 
-def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
-    if path is None or excluded_paths is None or not excluded_paths:
-        return True
-    if path[-1] != '/':
-        path += '/'
-    for excl_path in excluded_paths:
-        if excl_path.endswith('/'):
-            if path == excl_path:
-                return False
-        else:
-            if path.startswith(excl_path):
-                return False
-    return True
+if __name__ == '__main__':
+    a = Auth()
 
-
-def authorization_header(self, request=None) -> str:
-    if request is None or 'Authorization' not in request.headers:
-        return None
-    return request.headers['Authorization']
+    print(a.require_auth(None, None))  # True
+    print(a.require_auth(None, []))  # True
+    print(a.require_auth("/api/v1/status/", []))  # True
+    print(a.require_auth("/api/v1/status/", ["/api/v1/status/"]))  # False
+    print(a.require_auth("/api/v1/status", ["/api/v1/status/"]))  # False
+    print(a.require_auth("/api/v1/users", ["/api/v1/status/"]))  # True
+    print(
+        a.require_auth(
+            "/api/v1/users",
+            ["/api/v1/status/", "/api/v1/stats"]
+        )
+    )  # True
