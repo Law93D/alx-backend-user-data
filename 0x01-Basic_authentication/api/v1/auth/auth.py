@@ -16,23 +16,31 @@ class Auth:
         """
         if path and not path.endswith('/'):
             path = path + '/'
-        if not path or path not in excluded_path:
+        # Returns True
+        if not path or path not in excluded_paths:
             return True
+        # Returns True
         if not excluded_paths or excluded_paths == []:
             return True
+        # Returns False
         if path in excluded_paths:
             return False
+        # You can assume excluded_paths
         return False
 
     def authorization_header(self, request=None) -> None:
         """
-
+        Checks for authorization header in request
         """
-        return None
+        key = 'Authorization'
+
+        if request is NONE or key not in request.headers:
+            return
+        return request.headers.get(key)
 
     def current_user(self, request=None) -> None:
         """
-
+        Only Returns None
         """
         return None
 
