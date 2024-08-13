@@ -57,6 +57,29 @@ class Auth:
         except NoResultFound:
             return None
 
+    def destroy_session(self, user_id: int) -> None:
+        """
+        Destroy the session for the given user ID
+        """
+        user = self._db.find_user_by(id=user_id)
+        if user:
+            self._db.update_user(user_id, session_id=None)
+
+    def update_password(self, reset_token: str, new_password: str) -> None:
+        """
+        Update the user's password using a reset token
+        """
+        user = self._db.find_user_by(reset_token=reset_token)
+        if not user:
+            raise ValueError("User not found with the given reset token")
+
+        hashed_password = self._hash_password(new_password)
+        self._db.update_user(
+                user.id,
+                hashed_password=hashed_password.decode("utf-8"),
+                reset_token=None
+        )
+
 
 if __name__ == '__main__':
     # Code to test the Auth class (if needed)
