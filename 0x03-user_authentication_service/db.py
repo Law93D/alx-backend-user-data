@@ -38,16 +38,26 @@ class DB:
         return user
 
     def find_user_by(self, **kwargs) -> User:
-        """Find a user by arbitrary keyword arguments"""
-        if not hasattr(user, key):
-            raise InvalidRequestError()
-        user = self._session.query(User).filter_by(**kwargs).first()
-        if user:
-            return user
-        raise NoResultFound()
+        """
+        Find a user by arbitrary keyword arguments
+        Raise ValueError if no user is found.
+        """
+        query = self._session.query(User)
+        for key, value in kwargs.items():
+            if not hasattr(User, key):
+                raise ValueError(f"No such attribute: {key}")
+            query = query.filter(getattr(User, key) == value)
+
+        user = query.first()  # get the first matching user, if any
+
+        if user is None:
+            raise ValueError("No user found with the specified attributes")
+        return user
 
     def update_user(self, user_id: int, **kwargs) -> None:
-        """Update a user in the database"""
+        """
+        Update a user in the database
+        """
         user = self.find_user_by(id=user_id)
         for key, value in kwargs.items():
             if not hasattr(user, key):
@@ -66,14 +76,7 @@ if __name__ == '__main__':
     print(find_user.id)
 
     try:
-        find_user = my_db.find_user_by(email="test2@test.com")
-        print(find_user.id)
-
-    except NoResultFound:
-        print("Not found")
-
-    try:
-        find_user = my_db.find_user_by(no_email="test@test.com")
-        print(find_user.id)
-    except InvalidRequestError:
-        print("Invalid")
+        find_user = my_db.find_user_by(email="test@test.com")
+        print(find_user)
+    except ValueError as e:
+        print(f"Error: {e}")
