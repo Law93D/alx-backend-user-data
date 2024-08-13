@@ -39,12 +39,12 @@ class DB:
 
     def find_user_by(self, **kwargs) -> User:
         """Find a user by arbitrary keyword arguments"""
-        if not kwargs:
-            raise InvalidRequestError
+        if not hasattr(user, key):
+            raise InvalidRequestError()
         user = self._session.query(User).filter_by(**kwargs).first()
-        if not user:
-            raise NoResultFound
-        return user
+        if user:
+            return user
+        raise NoResultFound()
 
     def update_user(self, user_id: int, **kwargs) -> None:
         """Update a user in the database"""
@@ -54,3 +54,26 @@ class DB:
                 raise ValueError(f"User has no attribute '{key}'")
             setattr(user, key, value)
         self._session.commit()
+
+
+if __name__ == '__main__':
+    my_db = DB()
+
+    user = my_db.add_user("test@test.com", "PwdHashed")
+    print(user.id)
+
+    find_user = my_db.find_user_by(email="test@test.com")
+    print(find_user.id)
+
+    try:
+        find_user = my_db.find_user_by(email="test2@test.com")
+        print(find_user.id)
+
+    except NoResultFound:
+        print("Not found")
+
+    try:
+        find_user = my_db.find_user_by(no_email="test@test.com")
+        print(find_user.id)
+    except InvalidRequestError:
+        print("Invalid")
