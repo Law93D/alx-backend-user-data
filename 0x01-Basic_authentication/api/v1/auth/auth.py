@@ -1,62 +1,38 @@
 #!/usr/bin/env python3
-""" Class to manage API Auth.
+"""Authentication module for the API.
 """
-from flask import request
+import re
 from typing import List, TypeVar
+from flask import request
 
 
 class Auth:
+    """Authentication class.
     """
-    manage API auth
-    """
-
     def require_auth(self, path: str, excluded_paths: List[str]) -> bool:
+        """Checks if a path requires authentication.
         """
-        Checks if auth is required to access path
-        """
-        if path and not path.endswith('/'):
-            path = path + '/'
-        # Returns True
-        if not path or path not in excluded_paths:
-            return True
-        # Returns True
-        if not excluded_paths or excluded_paths == []:
-            return True
-        # Returns False
-        if path in excluded_paths:
-            return False
-        # You can assume excluded_paths
-        return False
+        if path is not None and excluded_paths is not None:
+            for exclusion_path in map(lambda x: x.strip(), excluded_paths):
+                pattern = ''
+                if exclusion_path[-1] == '*':
+                    pattern = '{}.*'.format(exclusion_path[0:-1])
+                elif exclusion_path[-1] == '/':
+                    pattern = '{}/*'.format(exclusion_path[0:-1])
+                else:
+                    pattern = '{}/*'.format(exclusion_path)
+                if re.match(pattern, path):
+                    return False
+        return True
 
-    def authorization_header(self, request=None) -> None:
+    def authorization_header(self, request=None) -> str:
+        """Gets the authorization header field from the request.
         """
-        Checks for authorization header in request
-        """
-        key = 'Authorization'
-
-        if request is NONE or key not in request.headers:
-            return
-        return request.headers.get(key)
-
-    def current_user(self, request=None) -> None:
-        """
-        Only Returns None
-        """
+        if request is not None:
+            return request.headers.get('Authorization', None)
         return None
 
-
-if __name__ == '__main__':
-    a = Auth()
-
-    print(a.require_auth(None, None))  # True
-    print(a.require_auth(None, []))  # True
-    print(a.require_auth("/api/v1/status/", []))  # True
-    print(a.require_auth("/api/v1/status/", ["/api/v1/status/"]))  # False
-    print(a.require_auth("/api/v1/status", ["/api/v1/status/"]))  # False
-    print(a.require_auth("/api/v1/users", ["/api/v1/status/"]))  # True
-    print(
-        a.require_auth(
-            "/api/v1/users",
-            ["/api/v1/status/", "/api/v1/stats"]
-        )
-    )  # True
+    def current_user(self, request=None) -> TypeVar('User'):
+        """Gets the current user from the request.
+        """
+        return None
